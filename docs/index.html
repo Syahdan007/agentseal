@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentSeal — The trust registry for the agent economy</title>
+<meta name="description" content="AgentSeal is an on-chain trust registry for the AI-agent economy on BNB Chain. Only verified Agent ID holders can write; everyone can read.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div class="brand">
+      <div class="wordmark">Agent<span class="accent">Seal</span></div>
+      <p class="tagline">The trust registry for the agent economy — written only by verified Agent ID holders.</p>
+    </div>
+    <div class="header-actions">
+      <div id="wallet-chip" class="wallet-chip hidden">
+        <span class="dot"></span><span id="wallet-chip-text"></span>
+      </div>
+      <button id="btn-connect" class="btn btn-primary">Connect Wallet</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div id="global-banner" class="banner banner-warn hidden"></div>
+  <div id="tx-status" class="banner banner-info hidden"></div>
+
+  <!-- Holder status -->
+  <section class="card" id="holder-card">
+    <h2>Your Agent ID status</h2>
+    <div id="holder-not-connected">
+      <p class="muted">Connect your wallet to see your Agent ID, your check-in streak, and to write to the registry. Reading the registry below works without connecting.</p>
+    </div>
+    <div id="holder-connected" class="hidden">
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-label">Agent ID</div>
+          <div class="stat-value" id="stat-handle">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Wallet</div>
+          <div class="stat-value mono small" id="stat-wallet">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Check-in streak</div>
+          <div class="stat-value" id="stat-streak">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total check-ins</div>
+          <div class="stat-value" id="stat-total-checkins">—</div>
+        </div>
+      </div>
+      <p id="holder-guidance" class="guidance hidden">
+        No Agent ID found for this wallet. You can claim one free in the Binance App:
+        open the app, go to <strong>Wallet</strong>, and tap the <strong>Agent ID</strong> banner.
+        Agent IDs are non-transferable and limited to one per wallet.
+      </p>
+      <div class="row">
+        <button id="btn-checkin" class="btn btn-primary" disabled>Check In</button>
+        <span id="checkin-note" class="muted small"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section class="card" id="projects-card">
+    <div class="section-head">
+      <h2>Registered projects</h2>
+      <button id="btn-refresh-projects" class="btn btn-ghost">Refresh</button>
+    </div>
+    <div id="projects-not-deployed" class="empty-state hidden">
+      <p><strong>Contract not yet deployed.</strong></p>
+      <p class="muted">The AgentSeal contract address has not been configured yet, so on-chain project data can't be loaded. This page will light up as soon as the contract is live on BNB Chain.</p>
+    </div>
+    <p id="projects-loading" class="muted">Loading projects from BNB Chain…</p>
+    <p id="projects-empty" class="muted hidden">No projects registered yet. Be the first Agent ID holder to register one below.</p>
+    <div id="projects-error" class="banner banner-warn hidden"></div>
+    <ul id="project-list" class="project-list"></ul>
+
+    <!-- Project detail -->
+    <div id="project-detail" class="detail hidden">
+      <div class="section-head">
+        <h3 id="detail-name">Project</h3>
+        <button id="btn-close-detail" class="btn btn-ghost">Close</button>
+      </div>
+      <dl class="detail-grid">
+        <dt>Registrant</dt><dd class="mono" id="detail-registrant">—</dd>
+        <dt>Link</dt><dd id="detail-link">—</dd>
+        <dt>Contract</dt><dd class="mono" id="detail-contract">—</dd>
+        <dt>Registered</dt><dd id="detail-created">—</dd>
+        <dt>Vouches</dt><dd id="detail-vouches">—</dd>
+        <dt>Flags</dt><dd id="detail-flags">—</dd>
+        <dt>Trust score</dt><dd id="detail-trust">—</dd>
+      </dl>
+      <p id="detail-description" class="description"></p>
+
+      <div class="attest-box">
+        <h4>Your attestation</h4>
+        <p id="my-attestation" class="muted small">—</p>
+        <label class="field">
+          <span>Note (optional, stored on-chain with your attestation)</span>
+          <input type="text" id="attest-note" maxlength="280" placeholder="Why do you vouch for — or flag — this project?">
+        </label>
+        <div class="row">
+          <button id="btn-vouch" class="btn btn-vouch">Vouch</button>
+          <button id="btn-flag" class="btn btn-flag">Flag</button>
+        </div>
+        <p class="muted small" id="attest-note-help">Attesting again overwrites your previous attestation for this project. Only Agent ID holders can attest; your attestation is your personal opinion, recorded under your own Agent ID.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Register -->
+  <section class="card" id="register-card">
+    <h2>Register a project</h2>
+    <p class="muted">Only Agent ID holders can register a project. Registration is an on-chain transaction on BNB Chain that you review and confirm in your own wallet — AgentSeal never touches your funds.</p>
+    <form id="register-form">
+      <label class="field">
+        <span>Project name *</span>
+        <input type="text" id="reg-name" maxlength="120" required placeholder="e.g. My Agent Project">
+      </label>
+      <label class="field">
+        <span>Link *</span>
+        <input type="url" id="reg-link" maxlength="300" required placeholder="https://…">
+      </label>
+      <label class="field">
+        <span>Project contract address (optional)</span>
+        <input type="text" id="reg-contract" maxlength="42" placeholder="0x… (leave empty if none)">
+      </label>
+      <label class="field">
+        <span>Description</span>
+        <textarea id="reg-description" rows="4" maxlength="1000" placeholder="What does this project do?"></textarea>
+      </label>
+      <div class="row">
+        <button type="submit" id="btn-register" class="btn btn-primary">Register Project</button>
+        <span id="register-note" class="muted small"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- How it works -->
+  <section class="card" id="how-card">
+    <h2>How it works — and why Agent ID</h2>
+    <div class="cols">
+      <div>
+        <h3>Identity-gated writing</h3>
+        <p>Anyone can read this registry. Writing — registering a project, vouching, flagging, checking in — is restricted to wallets that hold an <strong>Agent ID</strong>: a non-transferable identity credential issued by Binance Wallet, limited to one per wallet. That one-person-one-identity gate is what keeps Sybil spam and throwaway accounts out of the registry.</p>
+        <h3>Daily check-ins</h3>
+        <p>Holders can check in once per UTC day. Streaks are public and on-chain, so a project's community can see which identities actually show up over time.</p>
+      </div>
+      <div>
+        <h3>Attestations are opinions</h3>
+        <p>A vouch or a flag is the <strong>personal opinion of one individual Agent ID holder</strong> — not an endorsement by AgentSeal, not an audit, and not financial advice. A high trust score means some holders vouched; always do your own research before interacting with any project listed here.</p>
+        <h3>No custody, no promises</h3>
+        <p>AgentSeal never takes custody of funds, never handles investments, and <strong>promises no returns of any kind</strong>. The contract only stores registry data: projects, attestations, and check-in streaks.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer muted small">
+    <p>AgentSeal runs on BNB Chain (chain ID 56). Agent ID registry: <span class="mono">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</span> · AgentSeal contract: <span class="mono" id="footer-contract">not yet deployed</span></p>
+    <p>AgentSeal is an independent project. It is not affiliated with or endorsed by any exchange or chain foundation.</p>
+  </footer>
+
+</main>
+
+<script src="ethers.min.js"></script>
+<script src="agentseal-abi.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
